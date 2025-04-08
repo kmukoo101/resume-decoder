@@ -6,14 +6,16 @@ This module provides the core logic for:
 - Rewriting text in different tones/styles
 - Scoring the density of corporate jargon
 - Highlighting detected buzzwords in original text
+- Highlighting tone-relevant words for optional visual feedback
 
 Used by both the main decoder page and examples page.
 """
 
 import re
 from typing import Tuple, Dict
+from utils.tone_analyzer import highlight_tone_words
 
-def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Plain English") -> Tuple[str, int, str]:
+def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Plain English") -> Tuple[str, int, str, str]:
     """
     Decodes the input resume or job description text by identifying and translating buzzwords
     into more honest or humorous equivalents.
@@ -25,10 +27,11 @@ def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Pl
                      "Plain English", "Real Talk", "Gen Z", "Corporate Satire"
 
     Returns:
-        Tuple[str, int, str]:
+        Tuple[str, int, str, str]:
             - decoded_text: The rewritten version of the text
             - score: % of buzzwords detected in the original
             - highlighted_text: HTML-formatted version of original text with buzzwords highlighted
+            - tone_highlighted_text: HTML-formatted version with tone categories highlighted
     """
     # Normalize and tokenize
     original_words = re.findall(r'\b\w[\w\-]*\b', input_text.lower())
@@ -40,10 +43,13 @@ def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Pl
     # Highlight original text
     highlighted_text = highlight_buzzwords(input_text, buzzword_dict)
 
+    # Highlight tone categories
+    tone_highlighted_text = highlight_tone_words(input_text)
+
     # Rewrite text in selected style
     decoded_text = rewrite_text(input_text, buzzword_dict, style)
 
-    return decoded_text, score, highlighted_text
+    return decoded_text, score, highlighted_text, tone_highlighted_text
 
 
 def highlight_buzzwords(text: str, buzzword_dict: Dict[str, str]) -> str:
@@ -64,7 +70,6 @@ def highlight_buzzwords(text: str, buzzword_dict: Dict[str, str]) -> str:
             return f"<mark title='{buzzword_dict[lower_word]}'>{word}</mark>"
         return word
 
-    # Use regex to match words only (preserves punctuation)
     highlighted = re.sub(r'\b\w[\w\-]*\b', highlight, text)
     return highlighted
 
@@ -86,7 +91,6 @@ def rewrite_text(text: str, buzzword_dict: Dict[str, str], style: str) -> str:
         lower = word.lower()
         if lower in buzzword_dict:
             base = buzzword_dict[lower]
-            # Customize translation style
             if style == "Plain English":
                 return base
             elif style == "Real Talk":
@@ -97,8 +101,6 @@ def rewrite_text(text: str, buzzword_dict: Dict[str, str], style: str) -> str:
                 return f"{word}™️ ({base})"
         return word
 
-    # Reconstruct sentence with style-based replacements
     words = re.findall(r'\b\w[\w\-]*\b|\W+', text)
     rewritten = "".join([translate(w) if re.match(r'\w[\w\-]*', w) else w for w in words])
     return rewritten
-
