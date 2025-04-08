@@ -9,6 +9,7 @@ Features:
 - Buzzword detection and scoring
 - Multiple tone options for translation
 - Highlighting of corporate fluff
+- Export and copy features for decoded output
 """
 
 import streamlit as st
@@ -73,10 +74,28 @@ if st.button("🔥 Decode It"):
         st.markdown("### 🪞 Decoded Version")
         st.write(decoded_text)
 
+        # ------------------------
+        # Export & Copy Options
+        # ------------------------
+        st.markdown("### 📤 Export or Share")
+
+        st.download_button(
+            label="💾 Download Decoded Text",
+            data=decoded_text,
+            file_name="decoded_resume.txt",
+            mime="text/plain"
+        )
+
+        st.text_area(
+            label="📋 Copy-Friendly Box",
+            value=decoded_text,
+            height=150,
+            help="Click in the box, press Ctrl+A then Ctrl+C to copy."
+        )
+
         st.markdown("### ✏️ Original with Highlights")
         st.markdown(highlights, unsafe_allow_html=True)
 
 # Optional tip
 st.markdown("---")
 st.caption("Tip: Use 'Gen Z' or 'Corporate Satire' mode for a laugh. Try pasting your own resume!")
-
