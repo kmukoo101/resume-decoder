@@ -1,1 +1,7 @@
-
+streamlit>=1.25
+python-dateutil>=2.8.2
+simplejson>=3.17.6
+colorama>=0.4.6
+spacy>=3.5.0
+nltk>=3.8.1
+transformers>=4.30.0
