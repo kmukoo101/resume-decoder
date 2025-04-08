@@ -20,18 +20,23 @@ Features:
 - Inline tone highlighting
 - Visual tone breakdown chart
 - Resume quality score badge
+- Shareable URL session encoding
+- PDF export option (via base64 workaround)
+- Compare multiple resumes side-by-side
 """
 
 import streamlit as st
 from app.components import text_utils
 from utils.funny_titles import generate_title
 from utils.style_metadata import STYLE_DESCRIPTIONS
-from utils.score_meter import interpret_score, render_progress_bar, render_bs_meter
+from utils.score_meter import interpret_score, render_progress_bar, render_bs_meter, calculate_resume_quality, render_quality_badge
 from utils.ats_check import check_ats_friendly
-from utils.tone_analyzer import analyze_tone, get_dominant_tone
+from utils.tone_analyzer import analyze_tone
+from utils.session_storage import create_export_bundle
 import altair as alt
 import json
 import os
+import base64
 
 # ------------------------
 # Load buzzword mapping
@@ -80,14 +85,17 @@ if new_word and new_def:
     buzzword_map[new_word.lower()] = new_def
 
 # ------------------------
-# Load Session (optional)
+# Share Link Decoding
 # ------------------------
-with st.expander("Load Previous Session"):
-    uploaded_file = st.file_uploader("Upload a previously saved decoding session (.json)")
-    if uploaded_file:
-        session_data = json.load(uploaded_file)
-        user_input = session_data.get("input", "")
-        style = session_data.get("style", style)
+params = st.query_params
+if "state" in params:
+    try:
+        decoded_bytes = base64.urlsafe_b64decode(params["state"][0])
+        decoded_json = json.loads(decoded_bytes.decode("utf-8"))
+        user_input = decoded_json.get("input", user_input)
+        style = decoded_json.get("style", style)
+    except Exception:
+        st.warning("Could not decode shared session.")
 
 # ------------------------
 # Decode Button Logic
@@ -97,8 +105,7 @@ if st.button("Decode It"):
     if not user_input.strip():
         st.warning("Please enter text to decode.")
     else:
-        # Call the core decoding function
-        decoded_text, score, highlights = text_utils.decode_text(
+        decoded_text, score, highlights, tone_highlighted = text_utils.decode_text(
             input_text=user_input,
             buzzword_dict=buzzword_map,
             style=style
@@ -111,6 +118,25 @@ if st.button("Decode It"):
         st.markdown(interpret_score(score))
         render_bs_meter(score)
 
+        # Tone Breakdown Chart
+        tone_data = analyze_tone(user_input)
+        if tone_data:
+            chart_data = [{"Tone": k.title(), "Count": v} for k, v in tone_data.items()]
+            tone_chart = alt.Chart(alt.Data(values=chart_data)).mark_bar().encode(
+                x="Tone:N",
+                y="Count:Q",
+                color="Tone:N"
+            ).properties(height=200)
+            st.altair_chart(tone_chart, use_container_width=True)
+        else:
+            st.info("No dominant tones found in text.")
+
+        # Resume Quality Score
+        ats_result = check_ats_friendly(user_input)
+        quality = calculate_resume_quality(bs_score=score, ats_score=100 * sum(ats_result.values()) / len(ats_result), tone_data=tone_data)
+        render_quality_badge(quality)
+
+        # View Results
         if layout == "Side-by-Side":
             col1, col2 = st.columns(2)
             with col1:
@@ -128,30 +154,25 @@ if st.button("Decode It"):
         # Honest title generator
         st.markdown(f"### Honest Job Title: *{generate_title()}*")
 
-        # ATS Checker
+        # ATS Breakdown
         st.markdown("### ATS Compatibility Check")
-        ats_result = check_ats_friendly(user_input)
         for k, v in ats_result.items():
             st.markdown(f"- **{k.replace('_', ' ').title()}**: {'✅' if v else '❌'}")
 
-        # Tone Analysis
-        st.markdown("### 🧭 Tone Breakdown")
-        tone_data = analyze_tone(user_input)
-        if tone_data:
-            chart_data = [{"Tone": k.title(), "Count": v} for k, v in tone_data.items()]
-            tone_chart = alt.Chart(alt.Data(values=chart_data)).mark_bar().encode(
-                x="Tone:N",
-                y="Count:Q",
-                color="Tone:N"
-            ).properties(height=200)
-            st.altair_chart(tone_chart, use_container_width=True)
-        else:
-            st.info("No dominant tones found in text.")
-
         # ------------------------
-        # Export & Copy Options
+        # Export & Share Options
         # ------------------------
         st.markdown("### Export or Share")
+
+        export_bundle = create_export_bundle(
+            input_text=user_input,
+            decoded=decoded_text,
+            style=style,
+            buzzword_score=score,
+            tone_results=tone_data,
+            ats_results=ats_result,
+            quality_score=quality
+        )
 
         st.download_button(
             label="Download Decoded Text",
@@ -162,10 +183,14 @@ if st.button("Decode It"):
 
         st.download_button(
             label="Save Full Session",
-            data=json.dumps({"input": user_input, "decoded": decoded_text, "style": style}),
+            data=json.dumps(export_bundle),
             file_name="resume_decoder_session.json",
             mime="application/json"
         )
+
+        encoded = base64.urlsafe_b64encode(json.dumps(export_bundle).encode("utf-8")).decode("utf-8")
+        share_url = f"?state={encoded}"
+        st.text_input("Shareable Link", value=share_url)
 
         st.text_area(
             label="Copy-Friendly Box",
