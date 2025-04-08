@@ -10,10 +10,16 @@ Features:
 - Multiple tone options for translation
 - Highlighting of corporate fluff
 - Export and copy features for decoded output
+- Custom buzzword injection
+- Style descriptions for clarity
+- Side-by-side view toggle
+- Honest job title generator
 """
 
 import streamlit as st
 from app.components import text_utils
+from utils.funny_titles import generate_title
+from utils.style_metadata import STYLE_DESCRIPTIONS
 import json
 import os
 
@@ -51,8 +57,17 @@ user_input = st.text_area(
 
 style = st.selectbox(
     "Choose your decoding style",
-    ["Plain English", "Real Talk", "Gen Z", "Corporate Satire"]
+    options=list(STYLE_DESCRIPTIONS.keys()),
+    format_func=lambda x: f"{x} – {STYLE_DESCRIPTIONS[x]}"
 )
+
+# Optional: Add custom buzzword
+st.markdown("Optional: Add a custom buzzword")
+new_word = st.text_input("Buzzword")
+new_def = st.text_input("Its real meaning")
+
+if new_word and new_def:
+    buzzword_map[new_word.lower()] = new_def
 
 # ------------------------
 # Decode Button Logic
@@ -69,10 +84,26 @@ if st.button("🔥 Decode It"):
             style=style
         )
 
-        # Display results
+        layout = st.radio("Choose Layout", ["Stacked", "Side-by-Side"], horizontal=True)
+
         st.markdown(f"### 🧠 Buzzword Score: {score}%")
-        st.markdown("### 🪞 Decoded Version")
-        st.write(decoded_text)
+
+        if layout == "Side-by-Side":
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("### 🪞 Decoded")
+                st.write(decoded_text)
+            with col2:
+                st.markdown("### ✏️ Original with Highlights")
+                st.markdown(highlights, unsafe_allow_html=True)
+        else:
+            st.markdown("### 🪞 Decoded Version")
+            st.write(decoded_text)
+            st.markdown("### ✏️ Original with Highlights")
+            st.markdown(highlights, unsafe_allow_html=True)
+
+        # Honest title generator
+        st.markdown(f"### 🧾 Honest Job Title: *{generate_title()}*")
 
         # ------------------------
         # Export & Copy Options
@@ -92,9 +123,6 @@ if st.button("🔥 Decode It"):
             height=150,
             help="Click in the box, press Ctrl+A then Ctrl+C to copy."
         )
-
-        st.markdown("### ✏️ Original with Highlights")
-        st.markdown(highlights, unsafe_allow_html=True)
 
 # Optional tip
 st.markdown("---")
