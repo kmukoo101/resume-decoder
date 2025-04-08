@@ -17,6 +17,9 @@ Features:
 - BS meter with score interpretation
 - ATS compatibility checker
 - Save/load session state
+- Inline tone highlighting
+- Visual tone breakdown chart
+- Resume quality score badge
 """
 
 import streamlit as st
@@ -25,6 +28,8 @@ from utils.funny_titles import generate_title
 from utils.style_metadata import STYLE_DESCRIPTIONS
 from utils.score_meter import interpret_score, render_progress_bar, render_bs_meter
 from utils.ats_check import check_ats_friendly
+from utils.tone_analyzer import analyze_tone, get_dominant_tone
+import altair as alt
 import json
 import os
 
@@ -128,6 +133,20 @@ if st.button("🔥 Decode It"):
         ats_result = check_ats_friendly(user_input)
         for k, v in ats_result.items():
             st.markdown(f"- **{k.replace('_', ' ').title()}**: {'✅' if v else '❌'}")
+
+        # Tone Analysis
+        st.markdown("### 🧭 Tone Breakdown")
+        tone_data = analyze_tone(user_input)
+        if tone_data:
+            chart_data = [{"Tone": k.title(), "Count": v} for k, v in tone_data.items()]
+            tone_chart = alt.Chart(alt.Data(values=chart_data)).mark_bar().encode(
+                x="Tone:N",
+                y="Count:Q",
+                color="Tone:N"
+            ).properties(height=200)
+            st.altair_chart(tone_chart, use_container_width=True)
+        else:
+            st.info("No dominant tones found in text.")
 
         # ------------------------
         # Export & Copy Options
