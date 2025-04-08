@@ -3,4 +3,4 @@ Resume Decoder App
 Initialize application package and expose useful utilities.
 """
 
-from .components import text_utils, styles
+from .components import *
