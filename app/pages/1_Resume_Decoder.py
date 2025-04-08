@@ -49,7 +49,7 @@ else:
 # Page Layout and Header
 # ------------------------
 
-st.title("🧾 Resume Decoder")
+st.title("Resume Decoder")
 st.caption("Translate job descriptions and resumes into real talk. No more corporate fluff.")
 
 st.markdown("Paste in your resume or job post below, and we'll decode it for clarity, honesty, or humor.")
@@ -58,7 +58,7 @@ st.markdown("Paste in your resume or job post below, and we'll decode it for cla
 # Text Input and Style Selection
 # ------------------------
 
-st.subheader("🔍 Input Text")
+st.subheader("Input Text")
 user_input = st.text_area(
     label="Enter a resume, job description, or bullet point list",
     height=300,
@@ -82,7 +82,7 @@ if new_word and new_def:
 # ------------------------
 # Load Session (optional)
 # ------------------------
-with st.expander("📂 Load Previous Session"):
+with st.expander("Load Previous Session"):
     uploaded_file = st.file_uploader("Upload a previously saved decoding session (.json)")
     if uploaded_file:
         session_data = json.load(uploaded_file)
@@ -93,7 +93,7 @@ with st.expander("📂 Load Previous Session"):
 # Decode Button Logic
 # ------------------------
 
-if st.button("🔥 Decode It"):
+if st.button("Decode It"):
     if not user_input.strip():
         st.warning("Please enter text to decode.")
     else:
@@ -106,7 +106,7 @@ if st.button("🔥 Decode It"):
 
         layout = st.radio("Choose Layout", ["Stacked", "Side-by-Side"], horizontal=True)
 
-        st.markdown(f"### 🧠 Buzzword Score: {score}%")
+        st.markdown(f"### Buzzword Score: {score}%")
         render_progress_bar(score)
         st.markdown(interpret_score(score))
         render_bs_meter(score)
@@ -117,19 +117,19 @@ if st.button("🔥 Decode It"):
                 st.markdown("### 🪞 Decoded")
                 st.write(decoded_text)
             with col2:
-                st.markdown("### ✏️ Original with Highlights")
+                st.markdown("### Original with Highlights")
                 st.markdown(highlights, unsafe_allow_html=True)
         else:
             st.markdown("### 🪞 Decoded Version")
             st.write(decoded_text)
-            st.markdown("### ✏️ Original with Highlights")
+            st.markdown("### Original with Highlights")
             st.markdown(highlights, unsafe_allow_html=True)
 
         # Honest title generator
-        st.markdown(f"### 🧾 Honest Job Title: *{generate_title()}*")
+        st.markdown(f"### Honest Job Title: *{generate_title()}*")
 
         # ATS Checker
-        st.markdown("### 📄 ATS Compatibility Check")
+        st.markdown("### ATS Compatibility Check")
         ats_result = check_ats_friendly(user_input)
         for k, v in ats_result.items():
             st.markdown(f"- **{k.replace('_', ' ').title()}**: {'✅' if v else '❌'}")
@@ -151,24 +151,24 @@ if st.button("🔥 Decode It"):
         # ------------------------
         # Export & Copy Options
         # ------------------------
-        st.markdown("### 📤 Export or Share")
+        st.markdown("### Export or Share")
 
         st.download_button(
-            label="💾 Download Decoded Text",
+            label="Download Decoded Text",
             data=decoded_text,
             file_name="decoded_resume.txt",
             mime="text/plain"
         )
 
         st.download_button(
-            label="📥 Save Full Session",
+            label="Save Full Session",
             data=json.dumps({"input": user_input, "decoded": decoded_text, "style": style}),
             file_name="resume_decoder_session.json",
             mime="application/json"
         )
 
         st.text_area(
-            label="📋 Copy-Friendly Box",
+            label="Copy-Friendly Box",
             value=decoded_text,
             height=150,
             help="Click in the box, press Ctrl+A then Ctrl+C to copy."
