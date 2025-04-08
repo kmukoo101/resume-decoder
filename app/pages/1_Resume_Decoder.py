@@ -14,12 +14,17 @@ Features:
 - Style descriptions for clarity
 - Side-by-side view toggle
 - Honest job title generator
+- BS meter with score interpretation
+- ATS compatibility checker
+- Save/load session state
 """
 
 import streamlit as st
 from app.components import text_utils
 from utils.funny_titles import generate_title
 from utils.style_metadata import STYLE_DESCRIPTIONS
+from utils.score_meter import interpret_score, render_progress_bar, render_bs_meter
+from utils.ats_check import check_ats_friendly
 import json
 import os
 
@@ -55,10 +60,10 @@ user_input = st.text_area(
     placeholder="Example: 'We're looking for a self-motivated, detail-oriented team player...'"
 )
 
-style = st.selectbox(
+style = st.radio(
     "Choose your decoding style",
     options=list(STYLE_DESCRIPTIONS.keys()),
-    format_func=lambda x: f"{x} – {STYLE_DESCRIPTIONS[x]}"
+    format_func=lambda x: f"{STYLE_DESCRIPTIONS[x]}"
 )
 
 # Optional: Add custom buzzword
@@ -68,6 +73,16 @@ new_def = st.text_input("Its real meaning")
 
 if new_word and new_def:
     buzzword_map[new_word.lower()] = new_def
+
+# ------------------------
+# Load Session (optional)
+# ------------------------
+with st.expander("📂 Load Previous Session"):
+    uploaded_file = st.file_uploader("Upload a previously saved decoding session (.json)")
+    if uploaded_file:
+        session_data = json.load(uploaded_file)
+        user_input = session_data.get("input", "")
+        style = session_data.get("style", style)
 
 # ------------------------
 # Decode Button Logic
@@ -87,6 +102,9 @@ if st.button("🔥 Decode It"):
         layout = st.radio("Choose Layout", ["Stacked", "Side-by-Side"], horizontal=True)
 
         st.markdown(f"### 🧠 Buzzword Score: {score}%")
+        render_progress_bar(score)
+        st.markdown(interpret_score(score))
+        render_bs_meter(score)
 
         if layout == "Side-by-Side":
             col1, col2 = st.columns(2)
@@ -105,6 +123,12 @@ if st.button("🔥 Decode It"):
         # Honest title generator
         st.markdown(f"### 🧾 Honest Job Title: *{generate_title()}*")
 
+        # ATS Checker
+        st.markdown("### 📄 ATS Compatibility Check")
+        ats_result = check_ats_friendly(user_input)
+        for k, v in ats_result.items():
+            st.markdown(f"- **{k.replace('_', ' ').title()}**: {'✅' if v else '❌'}")
+
         # ------------------------
         # Export & Copy Options
         # ------------------------
@@ -115,6 +139,13 @@ if st.button("🔥 Decode It"):
             data=decoded_text,
             file_name="decoded_resume.txt",
             mime="text/plain"
+        )
+
+        st.download_button(
+            label="📥 Save Full Session",
+            data=json.dumps({"input": user_input, "decoded": decoded_text, "style": style}),
+            file_name="resume_decoder_session.json",
+            mime="application/json"
         )
 
         st.text_area(
