@@ -1,6 +1,6 @@
 """
 Resume Decoder: A Streamlit app that translates job descriptions and resumes
-into plain, honest language — or a humorous rewrite — to help users
+into plain, honest language, or a humorous rewrite, to help users
 see through corporate jargon and fluff.
 
 Features:
