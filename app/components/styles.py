@@ -9,6 +9,8 @@ Features:
 - Typography tweaks
 - Consistent spacing and alignment
 - Section dividers and headers
+- Color-coded BS Meter ranges
+- ATS result styling
 """
 
 import streamlit as st
@@ -20,6 +22,8 @@ def inject_custom_css():
     - Font sizes
     - Section spacing
     - Custom mark element for buzzword tooltips
+    - Score badge styling
+    - BS Meter and ATS feedback colors
     """
     st.markdown("""
     <style>
@@ -63,6 +67,33 @@ def inject_custom_css():
         margin-bottom: 1rem;
     }
 
+    /* BS Meter Colors */
+    .bs-low {
+        color: #2e8b57; /* green */
+        font-weight: bold;
+    }
+
+    .bs-medium {
+        color: #e69a00; /* amber */
+        font-weight: bold;
+    }
+
+    .bs-high {
+        color: #cc0000; /* red */
+        font-weight: bold;
+    }
+
+    /* ATS status */
+    .ats-good {
+        color: #228B22;
+        font-weight: 600;
+    }
+
+    .ats-bad {
+        color: #B22222;
+        font-weight: 600;
+    }
+
     /* Footer */
     footer {
         font-size: 0.8rem;
@@ -72,7 +103,6 @@ def inject_custom_css():
     }
     </style>
     """, unsafe_allow_html=True)
-
 
 def score_badge(score: int):
     """
@@ -85,7 +115,6 @@ def score_badge(score: int):
         str: Renderable HTML
     """
     return f"<div class='score-badge'>Buzzword Score: {score}%</div>"
-
 
 def section_header(title: str):
     """
