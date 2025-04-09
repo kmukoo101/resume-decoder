@@ -40,7 +40,7 @@ if st.button("Decode It"):
         st.warning("Please enter some text to decode.")
     else:
         # Decode the input
-        decoded_text, score, highlights = text_utils.decode_text(user_input, buzzword_map, style=style)
+        decoded_text, score, highlights, tone_highlighted = text_utils.decode_text(user_input, buzzword_map, style=style)
 
         # Display score and interpretation
         st.markdown(f"**Buzzword Score:** {score}%")
