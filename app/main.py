@@ -128,29 +128,33 @@ if st.button("Decode It"):
         else:
             st.markdown("### Decoded Version")
         
-            # Format decoded text for readability
-            clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
+            clean_text = decoded_text.replace("•", "\n🔹").replace("●", "\n🔸").replace("  ", " ").strip()
             lines = clean_text.split("\n")
         
             for line in lines:
                 line = line.strip()
                 if not line:
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    continue
+                    continue  # Skip blank lines entirely
         
+                # Section headers
                 if "EXPERIENCE" in line.upper():
                     st.markdown(f"### 💼 **{line}**")
                 elif "SKILLS" in line.upper():
                     st.markdown(f"### 🧠 **{line}**")
-                elif line.endswith(":"):
-                    st.markdown(f"**{line}**")
-                elif line.strip().lower().startswith("co-owner") or re.match(r"^[A-Z][a-z]+.*-.*", line):
-                    st.markdown(f"#### 🧾 *{line}*")
+                # Roles
+                elif line.lower().startswith("co-owner") or re.match(r"^[A-Z][a-z]+.*-.*", line):
+                    st.markdown(f"**🗂️ _{line}_**")
+                # Dates
                 elif re.match(r"^\d{2}/\d{4}.*-", line):
-                    st.markdown(f"#### 📅 {line}")
+                    st.markdown(f"**📅 {line}**")
+                # Bullets with some styling
+                elif line.startswith("🔹") or line.startswith("🔸"):
+                    st.markdown(f"<p style='margin-top:0.25em;margin-bottom:0.25em'>{line}</p>", unsafe_allow_html=True)
+                # Strong first sentence lines (if italic)
+                elif re.match(r"^[_*].*[_*]$", line):
+                    st.markdown(f"📄 *{line.strip()}*")
                 else:
-                    st.markdown(line)
-
+                    st.markdown(f"{line}")
 
             # Format decoded text for readability
             clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
