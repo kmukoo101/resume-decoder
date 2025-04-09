@@ -1,25 +1,24 @@
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 
-def extract_keywords(text, top_n=15):
-    """Extract top N keywords using simple frequency analysis."""
-    vectorizer = CountVectorizer(stop_words='english', max_features=top_n)
+def extract_keywords(text):
+    # Tokenize and vectorize the text
+    vectorizer = CountVectorizer(stop_words='english')
     X = vectorizer.fit_transform([text])
-    return vectorizer.get_feature_names_out()
+    keywords = vectorizer.get_feature_names_out()
+    return list(keywords)
 
 def match_keywords(job_keywords, resume_keywords):
-    """Compare job and resume keyword sets and return match info."""
     job_set = set(job_keywords)
     resume_set = set(resume_keywords)
-
-    matched = job_set & resume_set
-    missing = job_set - resume_set
-    match_percent = round(len(matched) / len(job_set) * 100) if job_set else 0
+    matched = job_set.intersection(resume_set)
+    missing = job_set.difference(resume_set)
+    match_percent = (len(matched) / len(job_set)) * 100 if job_set else 0
 
     return {
+        "match_percent": round(match_percent, 2),
         "matched_keywords": list(matched),
-        "missing_keywords": list(missing),
-        "match_percent": match_percent
+        "missing_keywords": list(missing)
     }
 
 def suggest_resume_sections(job_description):
