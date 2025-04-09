@@ -125,8 +125,34 @@ if st.button("Decode It"):
                 st.markdown("### Original with Highlights")
                 st.markdown(highlights, unsafe_allow_html=True)
         else:
-            st.markdown("### 🪞 Decoded Version")
-            st.write(decoded_text)
+            st.markdown("### Decoded Version")
+            
+            # Format decoded text for easier reading
+            clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
+            lines = clean_text.split("\n")
+            
+            # Optional layout: semantic highlighting
+            for line in lines:
+                if "EXPERIENCE" in line.upper():
+                    st.markdown(f"### 💼 **{line.strip()}**")
+                elif "SKILLS" in line.upper():
+                    st.markdown(f"### 🧠 **{line.strip()}**")
+                elif line.strip().endswith(":"):
+                    st.markdown(f"**{line.strip()}**")
+                else:
+                    st.markdown(line.strip())
+
+
+            # Clean line breaks and spacing for resume formatting
+            clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
+            lines = clean_text.split("\n")
+            
+            for line in lines:
+                if line.strip() == "":
+                    st.markdown("---")  # adds a divider
+                else:
+                    st.markdown(f"{line.strip()}")
+
             st.markdown("### Original with Highlights")
             st.markdown(highlights, unsafe_allow_html=True)
 
