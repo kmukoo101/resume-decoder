@@ -20,6 +20,31 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 
 from utils.tone_analyzer import highlight_tone_words
 
+def extract_experience_sections(text):
+    """Roughly split text into job sections based on headers, dates, and bullets"""
+    jobs = []
+    blocks = text.split("\n\n")
+    current_job = {"title": "", "company": "", "dates": "", "summary": "", "bullets": []}
+
+    for block in blocks:
+        block = block.strip()
+        if not block:
+            continue
+        if re.match(r".+ - .+", block) and "experience" not in block.lower():
+            if current_job["title"]:
+                jobs.append(current_job)
+                current_job = {"title": "", "company": "", "dates": "", "summary": "", "bullets": []}
+            current_job["title"] = block
+        elif re.match(r"\d{2}/\d{4}.*-", block):
+            current_job["dates"] = block
+        elif block.startswith("🔸") or block.startswith("🔹"):
+            current_job["bullets"].append(block)
+        else:
+            current_job["summary"] += " " + block
+    if current_job["title"]:
+        jobs.append(current_job)
+    return jobs
+
 
 def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Plain English") -> Tuple[str, int, str, str]:
     """
