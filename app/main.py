@@ -127,12 +127,26 @@ if st.button("Decode It"):
         else:
             st.markdown("### 🧾 Decoded Version")
 
-            jobs = text_utils.extract_experience_sections(decoded_text)
-            for job in jobs:
-                with st.expander(f"🧾 {job['title']} at {job['company']} — {job['dates']}", expanded=False):
-                    st.markdown(f"**🗂 Summary:** {job['summary']}")
-                    for point in job["bullets"]:
-                        st.markdown(f"- {point}")
+            clean_text = decoded_text.replace("•", "\n🔸 ").replace("●", "\n🔹 ").replace("  ", " ").strip()
+            lines = [line.strip() for line in clean_text.split("\n") if line.strip()]
+            
+            for line in lines:
+                if "EXPERIENCE" in line.upper():
+                    st.markdown(f"### 💼 **{line}**")
+                elif "SKILLS" in line.upper():
+                    st.markdown(f"### 🧠 **{line}**")
+                elif re.match(r"^\d{2}/\d{4}.*-", line):  # Dates
+                    st.markdown(f"#### 📅 {line}")
+                elif re.match(r"^[A-Z].+ - .+", line):  # Job title + company
+                    st.markdown(f"#### 📝 *{line}*")
+                elif line.startswith("🔸") or line.startswith("🔹"):  # Bullets
+                    st.markdown(f"<p style='margin-top:0.15em;margin-bottom:0.15em'>{line}</p>", unsafe_allow_html=True)
+                elif re.match(r"^[_*].+[_*]$", line):  # Emphasis lines
+                    st.markdown(f"📄 *{line}*")
+                else:
+                    st.markdown(line)
+
+
 
             st.markdown("### Original with Highlights")
             st.markdown(highlights, unsafe_allow_html=True)
