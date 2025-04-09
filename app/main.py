@@ -73,3 +73,10 @@ if st.button("Decode It"):
         st.markdown("### Original with Highlights")
         st.markdown(highlights, unsafe_allow_html=True)
 
+        st.markdown(f"""
+        <div style="background-color:#f9f9f9; padding:20px; border-radius:10px;">
+        {decoded_text}
+        </div>
+        """, unsafe_allow_html=True)
+        
+
