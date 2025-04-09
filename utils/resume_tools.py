@@ -2,15 +2,36 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer
 
 def extract_keywords(text):
-    # Tokenize and vectorize the text
+    if not text or not isinstance(text, str):
+        return []
+
     vectorizer = CountVectorizer(stop_words='english')
-    X = vectorizer.fit_transform([text])
-    keywords = vectorizer.get_feature_names_out()
-    return list(keywords)
+    try:
+        X = vectorizer.fit_transform([text])
+        keywords = vectorizer.get_feature_names_out()
+        return list(keywords)
+    except Exception as e:
+        print(f"[Keyword Extraction Error]: {e}")
+        return []
+
+def load_text_from_file(file):
+    import fitz  # PyMuPDF
+    try:
+        with fitz.open(stream=file.read(), filetype="pdf") as doc:
+            text = "\n".join([page.get_text() for page in doc])
+        return text.strip()
+    except Exception as e:
+        print(f"[File Loader Error]: {e}")
+        return ""
 
 def match_keywords(job_keywords, resume_keywords):
+    if not isinstance(job_keywords, list) or not isinstance(resume_keywords, list):
+        job_keywords = job_keywords or []
+        resume_keywords = resume_keywords or []
+
     job_set = set(job_keywords)
     resume_set = set(resume_keywords)
+
     matched = job_set.intersection(resume_set)
     missing = job_set.difference(resume_set)
     match_percent = (len(matched) / len(job_set)) * 100 if job_set else 0
