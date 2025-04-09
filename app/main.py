@@ -147,11 +147,6 @@ if st.button("Decode It"):
                 else:
                     st.markdown(line)
 
-
-
-            st.markdown("### Original with Highlights")
-            st.markdown(highlights, unsafe_allow_html=True)
-
         st.markdown(f"### Honest Job Title: *{generate_title()}*")
 
         st.markdown("### ATS Compatibility Check")
