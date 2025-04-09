@@ -12,10 +12,14 @@ Used by both the main decoder page and examples page.
 """
 
 import re
+import sys
+import os
 from typing import Tuple, Dict
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from utils.tone_analyzer import highlight_tone_words
+
 
 def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Plain English") -> Tuple[str, int, str, str]:
     """
