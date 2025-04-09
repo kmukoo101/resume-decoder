@@ -7,3 +7,4 @@ nltk>=3.8.1
 transformers>=4.30.0
 PyMuPDF
 python-docx
+scikit-learn
