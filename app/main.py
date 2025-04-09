@@ -39,7 +39,6 @@ import altair as alt
 import json
 import os
 import base64
-import re
 
 # ------------------------
 # Load buzzword mapping
@@ -127,58 +126,13 @@ if st.button("Decode It"):
                 st.markdown(highlights, unsafe_allow_html=True)
         else:
             st.markdown("### 🧾 Decoded Version")
-        
-            clean_text = decoded_text.replace("•", "\n🔸 ").replace("●", "\n🔹 ").replace("  ", " ").strip()
-            lines = [line.strip() for line in clean_text.split("\n") if line.strip()]
-        
-            for line in lines:
-                if "EXPERIENCE" in line.upper():
-                    st.markdown(f"### 💼 **{line}**")
-                elif "SKILLS" in line.upper():
-                    st.markdown(f"### 🧠 **{line}**")
-                elif re.match(r"^\d{2}/\d{4}.*-", line):  # Dates
-                    st.markdown(f"#### 📅 {line}")
-                elif re.match(r"^[A-Z].+ - .+", line):  # Job title + company
-                    st.markdown(f"#### 📝 *{line}*")
-                elif line.startswith("🔸") or line.startswith("🔹"):  # Bullets
-                    st.markdown(f"<p style='margin-top:0.15em;margin-bottom:0.15em'>{line}</p>", unsafe_allow_html=True)
-                elif re.match(r"^[_*].+[_*]$", line):  # Emphasis lines
-                    st.markdown(f"📄 *{line}*")
-                else:
-                    st.markdown(line)
 
-            # Format decoded text for readability
-            clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
-            lines = clean_text.split("\n")
-        
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    continue
-        
-                if "EXPERIENCE" in line.upper():
-                    st.markdown(f"### 💼 **{line}**")
-                elif "SKILLS" in line.upper():
-                    st.markdown(f"### 🧠 **{line}**")
-                elif line.endswith(":"):
-                    st.markdown(f"**{line}**")
-                elif line.strip().lower().startswith("co-owner") or re.match(r"^[A-Z][a-z]+.*-.*", line):
-                    st.markdown(f"#### 🧾 *{line}*")
-                elif re.match(r"^\d{2}/\d{4}.*-", line):
-                    st.markdown(f"#### 📅 {line}")
-                else:
-                    st.markdown(line)
-
-            # Clean line breaks and spacing for resume formatting
-            clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
-            lines = clean_text.split("\n")
-            
-            for line in lines:
-                if line.strip() == "":
-                    st.markdown("---")  # adds a divider
-                else:
-                    st.markdown(f"{line.strip()}")
+            jobs = text_utils.extract_experience_sections(decoded_text)
+            for job in jobs:
+                with st.expander(f"🧾 {job['title']} at {job['company']} — {job['dates']}", expanded=False):
+                    st.markdown(f"**🗂 Summary:** {job['summary']}")
+                    for point in job["bullets"]:
+                        st.markdown(f"- {point}")
 
             st.markdown("### Original with Highlights")
             st.markdown(highlights, unsafe_allow_html=True)
@@ -228,4 +182,3 @@ if st.button("Decode It"):
 
 st.markdown("---")
 st.caption("Tip: Use 'Gen Z' or 'Corporate Satire' mode for a laugh. Try uploading your own resume!")
-
