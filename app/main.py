@@ -11,7 +11,7 @@ Features:
 """
 
 import streamlit as st
-from app.components import text_utils
+from components import text_utils
 import json
 
 # Load buzzword mapping
