@@ -39,6 +39,7 @@ import altair as alt
 import json
 import os
 import base64
+import re
 
 # ------------------------
 # Load buzzword mapping
