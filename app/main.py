@@ -5,7 +5,16 @@ This Streamlit page allows users to paste job descriptions or resume content,
 select a translation style, and receive a decoded version of the content
 with plain language or humorous interpretation.
 
-Features:
+Feature:
+- Resume Rebuilder: Create a new ATS-optimized resume from a job post + existing resume
+- AI Suggestion Cards: Show recommendations per section with accept/edit buttons
+- Real-time rewrite toggle
+- Keywords gap analysis vs. job post
+- Matching % indicator for job fit
+- Export as ATS-optimized PDF
+- Side-by-side editor for live resume building
+- Section prioritization based on job description
+- Tips popups for common resume errors
 - Buzzword detection and scoring
 - Multiple tone options for translation
 - Highlighting of corporate fluff
@@ -21,9 +30,7 @@ Features:
 - Resume quality score badge
 - Shareable URL session encoding
 - PDF export option (via base64 workaround)
-- Compare multiple resumes side-by-side (future)
-- Live dynamic rewrite toggle (future)
-- Print-friendly / styled export (future)
+- Compare multiple resumes side-by-side
 """
 
 import streamlit as st
@@ -38,6 +45,7 @@ import altair as alt
 import json
 import os
 import base64
+import re
 
 # ------------------------
 # Load buzzword mapping
@@ -92,7 +100,8 @@ if st.button("Decode It"):
     else:
         decoded_text, score, highlights, tone_highlighted = text_utils.decode_text(user_input, buzzword_map, style)
 
-        st.markdown(f"### Buzzword Score: `{score}%`")
+        st.subheader("Buzzword Score")
+        st.markdown(f"Score: `{score}%`")
         render_progress_bar(score)
         st.markdown(interpret_score(score))
         render_bs_meter(score)
@@ -113,7 +122,7 @@ if st.button("Decode It"):
         quality = calculate_resume_quality(score, 100 * sum(ats_result.values()) / len(ats_result), tone_data)
         render_quality_badge(quality)
 
-        st.markdown("### Decoded Summary")
+        st.subheader("Decoded Experience")
         jobs = text_utils.extract_experience_sections(decoded_text)
         if jobs:
             for i, job in enumerate(jobs):
@@ -122,15 +131,16 @@ if st.button("Decode It"):
                     for point in job['bullets']:
                         st.markdown(f"- {point}")
         else:
-            st.code(decoded_text, language="markdown")
+            st.write(decoded_text)
 
-        st.markdown(f"### Honest Job Title: *{generate_title()}*")
+        st.subheader("Honest Job Title")
+        st.markdown(f"*{generate_title()}*")
 
-        st.markdown("### ATS Compatibility Check")
+        st.subheader("ATS Compatibility Check")
         for k, v in ats_result.items():
             st.markdown(f"- **{k.replace('_', ' ').title()}**: {'✅' if v else '❌'}")
 
-        st.markdown("### Export or Share")
+        st.subheader("Export or Share")
 
         export_bundle = create_export_bundle(
             input_text=user_input,
