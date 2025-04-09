@@ -14,4 +14,3 @@ def render_resume_preview(name, title_focus, location, email, phone, linkedin, g
         markdown += f"### {section_title}\n{content.strip()}\n\n"
 
     return markdown
-
