@@ -126,35 +126,26 @@ if st.button("Decode It"):
                 st.markdown("### Original with Highlights")
                 st.markdown(highlights, unsafe_allow_html=True)
         else:
-            st.markdown("### Decoded Version")
+            st.markdown("### 🧾 Decoded Version")
         
-            clean_text = decoded_text.replace("•", "\n🔹").replace("●", "\n🔸").replace("  ", " ").strip()
-            lines = clean_text.split("\n")
+            clean_text = decoded_text.replace("•", "\n🔸 ").replace("●", "\n🔹 ").replace("  ", " ").strip()
+            lines = [line.strip() for line in clean_text.split("\n") if line.strip()]
         
             for line in lines:
-                line = line.strip()
-                if not line:
-                    continue  # Skip blank lines entirely
-        
-                # Section headers
                 if "EXPERIENCE" in line.upper():
                     st.markdown(f"### 💼 **{line}**")
                 elif "SKILLS" in line.upper():
                     st.markdown(f"### 🧠 **{line}**")
-                # Roles
-                elif line.lower().startswith("co-owner") or re.match(r"^[A-Z][a-z]+.*-.*", line):
-                    st.markdown(f"**🗂️ _{line}_**")
-                # Dates
-                elif re.match(r"^\d{2}/\d{4}.*-", line):
-                    st.markdown(f"**📅 {line}**")
-                # Bullets with some styling
-                elif line.startswith("🔹") or line.startswith("🔸"):
-                    st.markdown(f"<p style='margin-top:0.25em;margin-bottom:0.25em'>{line}</p>", unsafe_allow_html=True)
-                # Strong first sentence lines (if italic)
-                elif re.match(r"^[_*].*[_*]$", line):
-                    st.markdown(f"📄 *{line.strip()}*")
+                elif re.match(r"^\d{2}/\d{4}.*-", line):  # Dates
+                    st.markdown(f"#### 📅 {line}")
+                elif re.match(r"^[A-Z].+ - .+", line):  # Job title + company
+                    st.markdown(f"#### 📝 *{line}*")
+                elif line.startswith("🔸") or line.startswith("🔹"):  # Bullets
+                    st.markdown(f"<p style='margin-top:0.15em;margin-bottom:0.15em'>{line}</p>", unsafe_allow_html=True)
+                elif re.match(r"^[_*].+[_*]$", line):  # Emphasis lines
+                    st.markdown(f"📄 *{line}*")
                 else:
-                    st.markdown(f"{line}")
+                    st.markdown(line)
 
             # Format decoded text for readability
             clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
@@ -178,7 +169,6 @@ if st.button("Decode It"):
                     st.markdown(f"#### 📅 {line}")
                 else:
                     st.markdown(line)
-
 
             # Clean line breaks and spacing for resume formatting
             clean_text = decoded_text.replace("•", "\n\n🔹").replace("●", "\n\n🔸").replace("  ", " ").strip()
