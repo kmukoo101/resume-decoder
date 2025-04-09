@@ -15,7 +15,7 @@ Features:
 - Editable text blocks for each section
 - Export as ATS-ready PDF or DOCX
 """
-
+from utils.resume_template import render_resume_preview
 import streamlit as st
 import sys
 import os
@@ -84,25 +84,47 @@ if job_text and resume_text:
 else:
     st.info("Please provide both a job description and your current resume.")
 
+
+# Render preview markdown
+resume_md = render_resume_preview(
+    name=full_name,
+    title_focus=title_focus,
+    location=city_state,
+    email=email,
+    phone=phone,
+    linkedin=linkedin,
+    github=github,
+    sections=edited_sections
+)
+
+st.markdown("## Final Resume Preview")
+st.markdown(resume_md, unsafe_allow_html=True)
+
+st.download_button("Download Markdown Version", data=resume_md, file_name="final_resume.md")
+st.text_area("Copy-Friendly Markdown", resume_md, height=300)
+
+
+
+st.markdown(f"# {full_name}")
+st.markdown(f"**{title_focus}**  \n{city_state} · [{email}](mailto:{email}) · {phone} · [LinkedIn]({linkedin}) · [GitHub]({github})")
+
 st.markdown("---")
-st.subheader("Final Resume Preview")
 
-final_resume_md = render_final_resume(edited_sections)
+for section_title, content in edited_sections.items():
+    st.markdown(f"### {section_title}")
+    st.markdown(content)
 
-st.markdown(final_resume_md, unsafe_allow_html=True)
+
+markdown_export = f"# {full_name}\n**{title_focus}**  \n{city_state} · {email} · {phone} · {linkedin} · {github}\n\n"
+for section_title, content in edited_sections.items():
+    markdown_export += f"## {section_title}\n{content}\n\n"
 
 st.download_button(
-    label="Download Markdown Version",
-    data=final_resume_md,
-    file_name="ATS_Resume.md",
+    "Download Markdown Version",
+    data=markdown_export,
+    file_name="final_resume.md",
     mime="text/markdown"
 )
 
-st.text_area(
-    label="Copy-Friendly Markdown",
-    value=final_resume_md,
-    height=300,
-    help="Click inside, press Ctrl+A then Ctrl+C to copy."
-)
-
+st.text_area("Copy-Friendly Markdown", markdown_export, height=300)
 
