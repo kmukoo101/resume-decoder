@@ -1,5 +1,5 @@
-import re
 from sklearn.feature_extraction.text import CountVectorizer
+import fitz  # PyMuPDF
 
 def extract_keywords(text):
     if not text or not isinstance(text, str):
@@ -15,7 +15,6 @@ def extract_keywords(text):
         return []
 
 def load_text_from_file(file):
-    import fitz  # PyMuPDF
     try:
         with fitz.open(stream=file.read(), filetype="pdf") as doc:
             text = "\n".join([page.get_text() for page in doc])
