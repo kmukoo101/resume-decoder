@@ -45,14 +45,7 @@ def render_progress_bar(score: float):
     st.progress(min(int(score), 100))
 
 def render_bs_meter(score: float):
-    """
-    Displays a custom BS meter using emoji segments based on score.
-    The more BS, the more explosive it gets.
-
-    Parameters:
-        score (float): Buzzword percentage
-    """
-    meter = ""
+    st.markdown("### 💩 BS Meter")
     if score < 10:
         meter = "🟩🟩⬜⬜⬜⬜"
     elif score < 25:
@@ -67,8 +60,8 @@ def render_bs_meter(score: float):
         meter = "💣🔥🟥🟧🟨⬜"
     else:
         meter = "☢️💣🔥🟥🟧🟨"
+    st.markdown(f"<div style='font-size: 2rem'>{meter}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"**BS Meter:** `{meter}`")
 
 def calculate_resume_quality(bs_score: float, ats_score: float, tone_data: dict) -> int:
     """
