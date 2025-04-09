@@ -12,7 +12,6 @@ Features:
 - Export and copy features for decoded output
 - Custom buzzword injection
 - Style descriptions for clarity
-- Side-by-side view toggle
 - Honest job title generator
 - BS meter with score interpretation
 - ATS compatibility checker
@@ -22,7 +21,7 @@ Features:
 - Resume quality score badge
 - Shareable URL session encoding
 - PDF export option (via base64 workaround)
-- Compare multiple resumes side-by-side
+- Compare multiple resumes side-by-side (future)
 - Live dynamic rewrite toggle (future)
 - Print-friendly / styled export (future)
 """
@@ -39,7 +38,6 @@ import altair as alt
 import json
 import os
 import base64
-import re
 
 # ------------------------
 # Load buzzword mapping
@@ -57,8 +55,8 @@ else:
 # Page Layout and Header
 # ------------------------
 
-st.title("📄 Resume Decoder")
-st.caption("Translate job descriptions and resumes into real talk. No more corporate fluff.")
+st.title("Resume Decoder")
+st.caption("Translate job descriptions and resumes into real talk.")
 
 st.markdown("Paste in your resume or job post below, or upload a file. We'll decode it for clarity, honesty, or humor.")
 
@@ -88,13 +86,13 @@ style = st.radio("Choose your decoding style", options=list(STYLE_DESCRIPTIONS.k
 # Decode and Display Results
 # ------------------------
 
-if st.button("🚀 Decode It"):
+if st.button("Decode It"):
     if not user_input.strip():
         st.warning("Please enter or upload text to decode.")
     else:
         decoded_text, score, highlights, tone_highlighted = text_utils.decode_text(user_input, buzzword_map, style)
 
-        st.markdown(f"### 💬 Buzzword Score: `{score}%`")
+        st.markdown(f"### Buzzword Score: `{score}%`")
         render_progress_bar(score)
         st.markdown(interpret_score(score))
         render_bs_meter(score)
@@ -115,7 +113,7 @@ if st.button("🚀 Decode It"):
         quality = calculate_resume_quality(score, 100 * sum(ats_result.values()) / len(ats_result), tone_data)
         render_quality_badge(quality)
 
-        st.markdown("### 🧾 Decoded Experience")
+        st.markdown("### Decoded Summary")
         jobs = text_utils.extract_experience_sections(decoded_text)
         if jobs:
             for i, job in enumerate(jobs):
@@ -124,15 +122,15 @@ if st.button("🚀 Decode It"):
                     for point in job['bullets']:
                         st.markdown(f"- {point}")
         else:
-            st.write(decoded_text)
+            st.code(decoded_text, language="markdown")
 
-        st.markdown(f"### 🤹 Honest Job Title: *{generate_title()}*")
+        st.markdown(f"### Honest Job Title: *{generate_title()}*")
 
-        st.markdown("### ✅ ATS Compatibility Check")
+        st.markdown("### ATS Compatibility Check")
         for k, v in ats_result.items():
             st.markdown(f"- **{k.replace('_', ' ').title()}**: {'✅' if v else '❌'}")
 
-        st.markdown("### 📤 Export or Share")
+        st.markdown("### Export or Share")
 
         export_bundle = create_export_bundle(
             input_text=user_input,
@@ -145,14 +143,14 @@ if st.button("🚀 Decode It"):
         )
 
         st.download_button(
-            label="📎 Download Decoded Text",
+            label="Download Decoded Text",
             data=decoded_text,
             file_name="decoded_resume.txt",
             mime="text/plain"
         )
 
         st.download_button(
-            label="💾 Save Full Session",
+            label="Save Full Session",
             data=json.dumps(export_bundle),
             file_name="resume_decoder_session.json",
             mime="application/json"
@@ -160,10 +158,10 @@ if st.button("🚀 Decode It"):
 
         encoded = base64.urlsafe_b64encode(json.dumps(export_bundle).encode("utf-8")).decode("utf-8")
         share_url = f"?state={encoded}"
-        st.text_input("🔗 Shareable Link", value=share_url)
+        st.text_input("Shareable Link", value=share_url)
 
         st.text_area(
-            label="🧾 Copy-Friendly Box",
+            label="Copy-Friendly Box",
             value=decoded_text,
             height=150,
             help="Click in the box, press Ctrl+A then Ctrl+C to copy."
