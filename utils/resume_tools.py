@@ -1,4 +1,41 @@
 from sklearn.feature_extraction.text import CountVectorizer
+import re
+
+def extract_contact_header(resume_text):
+    lines = resume_text.splitlines()
+    header = {
+        "name": "Your Name",
+        "title": "Professional Title or Career Focus",
+        "location": "City, State",
+        "email": "",
+        "phone": "",
+        "linkedin": "",
+        "github": ""
+    }
+
+    for line in lines[:20]:  # Scan top 20 lines
+        if not header["email"]:
+            email_match = re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", line)
+            if email_match:
+                header["email"] = email_match.group()
+        if not header["phone"]:
+            phone_match = re.search(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", line)
+            if phone_match:
+                header["phone"] = phone_match.group()
+        if not header["linkedin"] and "linkedin.com" in line.lower():
+            header["linkedin"] = line.strip()
+        if not header["github"] and "github.com" in line.lower():
+            header["github"] = line.strip()
+
+    # Try to extract name and title from first few lines
+    potential_name = lines[0].strip()
+    if 2 <= len(potential_name.split()) <= 4:
+        header["name"] = potential_name
+
+    if len(lines) > 1:
+        header["title"] = lines[1].strip()
+
+    return header
 
 def extract_keywords(text):
     if not text or not isinstance(text, str):
