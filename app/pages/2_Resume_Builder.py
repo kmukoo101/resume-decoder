@@ -22,6 +22,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from utils.resume_tools import extract_keywords, match_keywords, suggest_resume_sections
 from utils.file_loader import load_text_from_file
+from utils.resume_templates import render_final_resume
 from utils.export import export_to_docx
 import json
 
@@ -82,3 +83,26 @@ if job_text and resume_text:
 
 else:
     st.info("Please provide both a job description and your current resume.")
+
+st.markdown("---")
+st.subheader("Final Resume Preview")
+
+final_resume_md = render_final_resume(edited_sections)
+
+st.markdown(final_resume_md, unsafe_allow_html=True)
+
+st.download_button(
+    label="Download Markdown Version",
+    data=final_resume_md,
+    file_name="ATS_Resume.md",
+    mime="text/markdown"
+)
+
+st.text_area(
+    label="Copy-Friendly Markdown",
+    value=final_resume_md,
+    height=300,
+    help="Click inside, press Ctrl+A then Ctrl+C to copy."
+)
+
+
