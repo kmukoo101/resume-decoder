@@ -1,5 +1,4 @@
 from sklearn.feature_extraction.text import CountVectorizer
-import fitz  # PyMuPDF
 
 def extract_keywords(text):
     if not text or not isinstance(text, str):
@@ -13,15 +12,6 @@ def extract_keywords(text):
     except Exception as e:
         print(f"[Keyword Extraction Error]: {e}")
         return []
-
-def load_text_from_file(file):
-    try:
-        with fitz.open(stream=file.read(), filetype="pdf") as doc:
-            text = "\n".join([page.get_text() for page in doc])
-        return text.strip()
-    except Exception as e:
-        print(f"[File Loader Error]: {e}")
-        return ""
 
 def match_keywords(job_keywords, resume_keywords):
     if not isinstance(job_keywords, list) or not isinstance(resume_keywords, list):
@@ -41,22 +31,31 @@ def match_keywords(job_keywords, resume_keywords):
         "missing_keywords": list(missing)
     }
 
-def suggest_resume_sections(job_description):
-    """Suggest resume sections based on content of job description."""
+def suggest_resume_sections(job_description, resume_text):
     lower_text = job_description.lower()
-    suggestions = []
+    resume_lower = resume_text.lower()
+    sections = []
 
     if 'communication' in lower_text:
-        suggestions.append('Communication Skills')
-    if 'leadership' in lower_text:
-        suggestions.append('Leadership Experience')
-    if 'project' in lower_text or 'manage' in lower_text:
-        suggestions.append('Project Management')
-    if 'sql' in lower_text or 'python' in lower_text:
-        suggestions.append('Technical Skills')
-    if 'customer' in lower_text:
-        suggestions.append('Customer Service')
-    if 'data' in lower_text:
-        suggestions.append('Data Analysis')
+        sections.append({'title': 'Communication Skills', 'content': 'Demonstrated ability to clearly convey ideas and collaborate with cross-functional teams.'})
 
-    return list(set(suggestions))
+    if 'leadership' in lower_text:
+        sections.append({'title': 'Leadership Experience', 'content': 'Led teams and initiatives with a focus on mentorship, delegation, and strategic outcomes.'})
+
+    if 'project' in lower_text or 'manage' in lower_text:
+        sections.append({'title': 'Project Management', 'content': 'Experienced in managing timelines, budgets, and deliverables for technical and operational projects.'})
+
+    if 'sql' in lower_text or 'python' in lower_text:
+        sections.append({'title': 'Technical Skills', 'content': 'Proficient in Python and SQL for data analysis, automation, and reporting.'})
+
+    if 'customer' in lower_text:
+        sections.append({'title': 'Customer Service', 'content': 'Skilled in delivering customer satisfaction through empathy, responsiveness, and efficiency.'})
+
+    if 'data' in lower_text:
+        sections.append({'title': 'Data Analysis', 'content': 'Analyzed trends and patterns to derive insights using statistical tools and data visualization techniques.'})
+
+    # Add fallback if no section suggestions found
+    if not sections:
+        sections.append({'title': 'Summary', 'content': resume_text[:500]})
+
+    return sections
