@@ -29,7 +29,20 @@ st.caption("Cut through the fluff. Get the truth. Decode resumes and job descrip
 
 # Text input
 st.subheader("Paste Your Resume or Job Description")
-user_input = st.text_area("Enter text here", height=300, placeholder="Paste job description or resume bullet points...")
+uploaded_file = st.file_uploader("Upload your resume or job description", type=["pdf", "docx", "txt"])
+user_input = ""
+
+if uploaded_file:
+    if uploaded_file.type == "application/pdf":
+        import fitz  # PyMuPDF
+        with fitz.open(stream=uploaded_file.read(), filetype="pdf") as doc:
+            user_input = "\n".join([page.get_text() for page in doc])
+    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        import docx
+        doc = docx.Document(uploaded_file)
+        user_input = "\n".join([para.text for para in doc.paragraphs])
+    else:
+        user_input = uploaded_file.read().decode("utf-8")
 
 # Style selection
 style = st.selectbox("Choose Translation Style", ["Plain English", "Real Talk", "Gen Z", "Corporate Satire"])
