@@ -29,18 +29,23 @@ st.caption("Cut through the fluff. Get the truth. Decode resumes and job descrip
 
 # Text input
 st.subheader("Paste Your Resume or Job Description")
-uploaded_file = st.file_uploader("Upload your resume or job description", type=["pdf", "docx", "txt"])
-user_input = ""
+uploaded_file = st.file_uploader(
+    "Upload your resume or job description",
+    type=["pdf", "docx", "txt"],
+    help="PDF, Word, or plain text"
+)
 
 if uploaded_file:
-    if uploaded_file.type == "application/pdf":
-        import fitz  # PyMuPDF
-        with fitz.open(stream=uploaded_file.read(), filetype="pdf") as doc:
-            user_input = "\n".join([page.get_text() for page in doc])
-    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        import docx
-        doc = docx.Document(uploaded_file)
-        user_input = "\n".join([para.text for para in doc.paragraphs])
+    import fitz  # for PDFs
+    from docx import Document  # for Word docs
+
+    file_type = uploaded_file.name.split('.')[-1].lower()
+    if file_type == "pdf":
+        doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
+        user_input = "\n".join([page.get_text() for page in doc])
+    elif file_type == "docx":
+        document = Document(uploaded_file)
+        user_input = "\n".join([para.text for para in document.paragraphs])
     else:
         user_input = uploaded_file.read().decode("utf-8")
 
