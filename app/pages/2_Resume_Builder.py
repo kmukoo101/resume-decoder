@@ -17,6 +17,9 @@ Features:
 """
 
 import streamlit as st
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from utils.resume_tools import extract_keywords, match_keywords, suggest_resume_sections
 from utils.file_loader import load_text_from_file
 from utils.export import export_to_docx
