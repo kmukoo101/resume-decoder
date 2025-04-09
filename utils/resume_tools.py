@@ -7,12 +7,20 @@ def extract_keywords(text, top_n=15):
     X = vectorizer.fit_transform([text])
     return vectorizer.get_feature_names_out()
 
-def match_keywords(job_keywords, resume_text):
-    """Check which job keywords appear in the resume."""
-    resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
-    matched = [kw for kw in job_keywords if kw.lower() in resume_words]
-    missing = [kw for kw in job_keywords if kw.lower() not in resume_words]
-    return matched, missing
+def match_keywords(job_keywords, resume_keywords):
+    """Compare job and resume keyword sets and return match info."""
+    job_set = set(job_keywords)
+    resume_set = set(resume_keywords)
+
+    matched = job_set & resume_set
+    missing = job_set - resume_set
+    match_percent = round(len(matched) / len(job_set) * 100) if job_set else 0
+
+    return {
+        "matched_keywords": list(matched),
+        "missing_keywords": list(missing),
+        "match_percent": match_percent
+    }
 
 def suggest_resume_sections(job_description):
     """Suggest resume sections based on content of job description."""
