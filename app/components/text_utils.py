@@ -13,7 +13,7 @@ Used by both the main decoder page and examples page.
 
 import re
 from typing import Tuple, Dict
-from utils.tone_analyzer import highlight_tone_words
+from ..utils.tone_analyzer import highlight_tone_words
 
 def decode_text(input_text: str, buzzword_dict: Dict[str, str], style: str = "Plain English") -> Tuple[str, int, str, str]:
     """
