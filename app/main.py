@@ -66,5 +66,10 @@ if st.button("Decode It"):
         st.write(decoded_text)
 
         # Show original with highlights
-        st.markdown("### ✏Original with Highlights:")
+
+        st.markdown("### Decoded Version")
+        st.code(decoded_text, language='markdown')
+        
+        st.markdown("### Original with Highlights")
         st.markdown(highlights, unsafe_allow_html=True)
+
